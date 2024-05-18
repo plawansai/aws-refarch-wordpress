@@ -28,10 +28,15 @@ Please refer to [history.md](/HISTORY.md) for a detailed list of changes in 2.0.
 ![](images/aws-refarch-wordpress-mastertemplate-parameters.png)
 
 Requires:
+
 Admin email address
+
 DB Master Username
+
 DB Master Password Must be letters (upper or lower), numbers, spaces, and these special characters `~!#$%^&*()_+,-
+
 WordPress admin username
+
 WordPress site directory
 
 ## Steps to Run
