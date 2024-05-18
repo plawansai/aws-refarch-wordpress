@@ -27,6 +27,13 @@ Please refer to [history.md](/HISTORY.md) for a detailed list of changes in 2.0.
 
 ![](images/aws-refarch-wordpress-mastertemplate-parameters.png)
 
+Requires:
+Admin email address
+DB Master Username
+DB Master Password Must be letters (upper or lower), numbers, spaces, and these special characters `~!#$%^&*()_+,-
+WordPress admin username
+WordPress site directory
+
 ## Steps to Run
 To launch the entire stack and deploy a WordPress site on AWS, click on one of the ***Launch Stack*** links below or download the Master template and launch it locally.
 
