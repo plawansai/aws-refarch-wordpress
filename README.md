@@ -31,6 +31,8 @@ Requires:
 
 Admin email address
 
+Availability Zones
+
 DB Master Username
 
 DB Master Password Must be letters (upper or lower), numbers, spaces, and these special characters `~!#$%^&*()_+,-
