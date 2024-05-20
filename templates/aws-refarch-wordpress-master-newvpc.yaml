@@ -242,7 +242,6 @@ Parameters:
   DatabaseInstanceType:
     AllowedValues:
       - db.t3.small
-      - db.m5d.large
       - db.t3.medium
       - db.r5.large
       - db.r5.xlarge
@@ -253,7 +252,7 @@ Parameters:
       - db.r5.16xlarge
       - db.r5.24xlarge
     ConstraintDescription: Must be a valid RDS instance class.
-    Default: db.t3.medium
+    Default: db.r5.large
     Description: The Amazon RDS database instance class.
     Type: String
   DatabaseMasterUsername:
@@ -466,10 +465,9 @@ Parameters:
     Type: String
   PHPVersion:
     AllowedValues:
-    - 8.1
     - 8.0
     - 7.4
-    Default: 8.1
+    Default: 8.0
     Description: The version of PHP to install.
     Type: String 
   PublicAlbAcmCertificate:
@@ -696,11 +694,9 @@ Parameters:
     AllowedValues:
       - latest
       - nightly
-      - 4.5
-      - 4.6
-      - 4.7
-      - 4.8
-      - 4.9
+      - 6.0.3
+      - 5.9.5
+      - 4.9.22
     Default: latest
     Description: The WordPress version (make sure this version is compatible with the PHP version selected above).
     Type: String
@@ -709,6 +705,7 @@ Conditions:
 
   AvailableAWSRegion:
     !Or [
+      !Equals [ !Ref 'AWS::Region', ap-southeast-1 ],
       !Equals [ !Ref 'AWS::Region', ap-southeast-2 ],
       !Equals [ !Ref 'AWS::Region', eu-central-1 ],
       !Equals [ !Ref 'AWS::Region', eu-west-1 ],
@@ -748,7 +745,7 @@ Resources:
           !Ref NumberOfAZs
         Subnet:
           !GetAtt [ newvpc, Outputs.PublicSubnet ]
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-bastion.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-bastion.yaml
   cloudfront:
     Condition: DeployCloudFront
     DependsOn: [ publicalb, web ]
@@ -761,7 +758,7 @@ Resources:
           !GetAtt [ publicalb, Outputs.PublicAlbDnsName ]
         WPDomainName:
           !Ref WPDomainName
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-04-cloudfront.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-04-cloudfront.yaml
   dashboardwithalarms:
     Condition: EfsCreateAlarms
     DependsOn: [ newvpc, securitygroups, publicalb, efsfilesystem, rds, efsalarms ]
@@ -784,7 +781,7 @@ Resources:
           !GetAtt [ publicalb, Outputs.PublicAlbFullName ]
         EfsCreateAlarms:
           !Ref EfsCreateAlarms         
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
   dashboardwithnoalarms:
     Condition: EfsCreateNoAlarms
     DependsOn: [ newvpc, securitygroups, publicalb, efsfilesystem, rds ]
@@ -799,7 +796,7 @@ Resources:
           !GetAtt [ publicalb, Outputs.PublicAlbFullName ]
         EfsCreateAlarms:
           !Ref EfsCreateAlarms         
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-06-dashboard.yaml
   efsfilesystem:
     DependsOn: [ newvpc, securitygroups ]
     Type: AWS::CloudFormation::Stack
@@ -825,7 +822,7 @@ Resources:
           !Ref EfsPerformanceMode
         Subnet:
           !GetAtt [ newvpc, Outputs.DataSubnet ]
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-efsfilesystem.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-efsfilesystem.yaml
   efsalarms:
     Condition: EfsCreateAlarms
     DependsOn: [ efsfilesystem ]
@@ -850,7 +847,7 @@ Resources:
           !GetAtt [ newvpc, Outputs.DataSubnet ]
         WarningThreshold:
           !Ref EfsWarningThreshold
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-efsalarms.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-efsalarms.yaml
   elasticache:
     Condition: DeployElastiCache
     DependsOn: [ newvpc, securitygroups ]
@@ -865,7 +862,7 @@ Resources:
           !GetAtt [ securitygroups, Outputs.ElastiCacheSecurityGroup ]
         NumberOfSubnets:
           !Ref NumberOfAZs
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-elasticache.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-elasticache.yaml
   newvpc:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -916,7 +913,7 @@ Resources:
           !Ref DataSubnet4Cidr
         DataSubnet5Cidr:
           !Ref DataSubnet5Cidr
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-01-newvpc.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-01-newvpc.yaml
   publicalb:
     Condition: AvailableAWSRegion
     DependsOn: [ newvpc, securitygroups ]
@@ -933,7 +930,7 @@ Resources:
           !GetAtt [ securitygroups, Outputs.PublicAlbSecurityGroup ]
         Vpc:
           !GetAtt [ newvpc, Outputs.Vpc ]
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-publicalb.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-publicalb.yaml
   rds:
     Condition: AvailableAWSRegion
     DependsOn: [ newvpc, securitygroups ]
@@ -958,7 +955,7 @@ Resources:
           !GetAtt [ newvpc, Outputs.DataSubnet ]
         NumberOfSubnets:
           !Ref NumberOfAZs
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-03-rds.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-03-rds.yaml
   route53:
     Condition: CreateRecordSet
     DependsOn: [ publicalb, web ]
@@ -971,7 +968,7 @@ Resources:
           !If [ DeployCloudFront, 'Z2FDTNDATAQYW2', !GetAtt [ publicalb, Outputs.PublicAlbCanonicalHostedZoneId ] ]
         WPDomainName:
           !Ref WPDomainName
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-05-route53.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-05-route53.yaml
   securitygroups:
     Condition: AvailableAWSRegion
     DependsOn: newvpc
@@ -982,7 +979,7 @@ Resources:
           !Ref SshAccessCidr
         Vpc:
           !GetAtt [ newvpc, Outputs.Vpc ]
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-02-securitygroups.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-02-securitygroups.yaml
   web:
     Condition: AvailableAWSRegion
     DependsOn: [ efsfilesystem, newvpc, publicalb, securitygroups ]
@@ -1039,13 +1036,13 @@ Resources:
           !Ref WPTitle
         WPVersion:
           !Ref WPVersion
-      TemplateURL: https://s3.amazonaws.com/aws-refarch/wordpress/latest/templates/aws-refarch-wordpress-04-web.yaml
+      TemplateURL: https://aws-refarch.s3.amazonaws.com/wordpress/latest/templates/aws-refarch-wordpress-04-web.yaml
 
 Outputs:
 
   StackStatus:
     Description: Master Stack Status
-    Value: !If [ AvailableAWSRegion, !Join [ '', [ 'Stack created in an available region: ', !Ref 'AWS::Region' ] ], "!!ERROR!!! - Nothing to do! - unavailable AWS Region. You must create this stack in an available AWS Region: 'us-east-1', 'us-east-2', 'us-west-2', 'eu-west-1', 'ap-southeast-2'." ]
+    Value: !If [ AvailableAWSRegion, !Join [ '', [ 'Stack created in an available region: ', !Ref 'AWS::Region' ] ], "!!ERROR!!! - Nothing to do! - unavailable AWS Region. You must create this stack in an available AWS Region: 'us-east-1', 'us-east-2', 'us-west-2', 'eu-west-1', 'ap-southeast-1', 'ap-southeast-2'." ]
   WPSiteUrl:
     Description: The URL of the WordPress site
     Value: !If [ CreateRecordSet, !Join [ '', [ 'http://www.', !Ref WPDomainName ] ], !If [ DeployCloudFront, !GetAtt [ cloudfront, Outputs.DnsHostname ], !GetAtt [ publicalb, Outputs.PublicAlbHostname ] ] ]
